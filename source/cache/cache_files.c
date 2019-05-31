@@ -51,7 +51,7 @@ dword cache_file_get_base_address(
     cache_file_functions *functions = cache_file_functions_get(version);
 
     if (functions && functions->get_base_address)
-        return functions->get_base_address(file);
+        return functions->get_base_address();
     
     return 0;
 }
@@ -173,9 +173,47 @@ dword cache_file_get_tags_offset(
     return 0;
 }
 
-tag cache_file_get_tag_group_tag(cache_file *instance);
-char const *cache_file_get_tag_name(cache_file *instance);
-dword cache_file_get_tag_offset(cache_file *instance);
+tag cache_file_get_tag_group_tag(
+    cache_file *file,
+    long index)
+{
+    cache_version version = cache_file_get_version(file);
+    cache_tag_instance *instance = cache_file_get_tag_instance(file, index);
+    cache_tag_instance_functions *functions = cache_tag_instance_functions_get(version);
+
+    if (functions && functions->get_group_tag)
+        return functions->get_group_tag(instance);
+    
+    return NONE;
+}
+
+char const *cache_file_get_tag_name(
+    cache_file *file,
+    long index)
+{
+    cache_version version = cache_file_get_version(file);
+    cache_tag_instance *instance = cache_file_get_tag_instance(file, index);
+    cache_tag_instance_functions *functions = cache_tag_instance_functions_get(version);
+
+    if (functions && functions->get_name_offset)
+        return file + functions->get_name_offset(file, instance);
+    
+    return 0;
+}
+
+dword cache_file_get_tag_offset(
+    cache_file *file,
+    long index)
+{
+    cache_version version = cache_file_get_version(file);
+    cache_tag_instance *instance = cache_file_get_tag_instance(file, index);
+    cache_tag_instance_functions *functions = cache_tag_instance_functions_get(version);
+
+    if (functions && functions->get_offset)
+        return functions->get_offset(instance);
+    
+    return 0;
+}
 
 char const *cache_file_get_string(
     cache_file *file,
@@ -195,12 +233,16 @@ char const *cache_file_get_string(
 cache_file_functions *cache_file_functions_get(
     cache_version version)
 {
-    extern cache_file_functions cache_file_gen1_functions;
+    extern cache_file_functions
+        cache_file_gen1_functions,
+        cache_file_gen2_functions;
 
     switch (version)
     {
     case _cache_version_gen1:
         return &cache_file_gen1_functions;
+    case _cache_version_gen2:
+        return &cache_file_gen2_functions;
     default:
         return 0;
     }
@@ -209,12 +251,16 @@ cache_file_functions *cache_file_functions_get(
 cache_header_functions *cache_header_functions_get(
     cache_version version)
 {
-    extern cache_header_functions cache_header_gen1_functions;
+    extern cache_header_functions
+        cache_header_gen1_functions,
+        cache_header_gen2_functions;
 
     switch (version)
     {
     case _cache_version_gen1:
         return &cache_header_gen1_functions;
+    case _cache_version_gen2:
+        return &cache_header_gen2_functions;
     default:
         return 0;
     }
@@ -223,12 +269,16 @@ cache_header_functions *cache_header_functions_get(
 cache_tag_header_functions *cache_tag_header_functions_get(
     cache_version version)
 {
-    extern cache_tag_header_functions cache_tag_header_gen1_functions;
+    extern cache_tag_header_functions
+        cache_tag_header_gen1_functions,
+        cache_tag_header_gen2_functions;
 
     switch (version)
     {
     case _cache_version_gen1:
         return &cache_tag_header_gen1_functions;
+    case _cache_version_gen2:
+        return &cache_tag_header_gen2_functions;
     default:
         return 0;
     }
@@ -237,8 +287,16 @@ cache_tag_header_functions *cache_tag_header_functions_get(
 cache_tag_instance_functions *cache_tag_instance_functions_get(
     cache_version version)
 {
+    extern cache_tag_instance_functions
+        cache_tag_instance_gen1_functions,
+        cache_tag_instance_gen2_functions;
+
     switch (version)
     {
+    case _cache_version_gen1:
+        return &cache_tag_instance_gen1_functions;
+    case _cache_version_gen2:
+        return &cache_tag_instance_gen2_functions;
     default:
         return 0;
     }

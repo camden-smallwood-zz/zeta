@@ -10,12 +10,17 @@
 
 int main()
 {
-    cache_file *file = cache_file_load("C:\\Halo\\Games\\Halo Combat Evolved [PC]\\gephyrophobia.map");
+    cache_file *file = cache_file_load("C:\\Halo\\Maps\\H2X\\ascension.map");
     
     printf("map: %s, build: %s, tag count: %li\n",
         cache_file_get_name(file),
         cache_file_get_build(file),
         cache_file_get_tag_count(file));
+    
+    long tag_count = cache_file_get_tag_count(file);
+
+    for (long i = 0; i < tag_count; i++)
+        printf("0x%X - %s\n", i, cache_file_get_tag_name(file, i));
 
     cache_file_dispose(file);
 

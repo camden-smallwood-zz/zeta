@@ -16,7 +16,7 @@ typedef struct cache_header_gen1
     long file_length;
     long compressed_file_length;
     long offset_to_index;
-    long tag_memory_size;
+    long tag_buffer_size;
     long : 32;
     long : 32;
     tag_string name;
@@ -27,16 +27,6 @@ typedef struct cache_header_gen1
     char unused[1936];
     tag footer_signature;
 } cache_header_gen1;
-
-typedef struct cache_tag_instance_gen1
-{
-    tag group_tags[3];
-    long index;
-    dword name_offset;
-    dword offset;
-    boolean external;
-    long : 32;
-} cache_tag_instance_gen1;
 
 typedef struct cache_tag_header_gen1
 {
@@ -52,11 +42,21 @@ typedef struct cache_tag_header_gen1
     tag signature;
 } cache_tag_header_gen1;
 
+typedef struct cache_tag_instance_gen1
+{
+    tag group_tags[3];
+    long index;
+    dword name_offset;
+    dword offset;
+    boolean external;
+    long : 32;
+} cache_tag_instance_gen1;
+
 /* ---------- prototypes */
 
 cache_file *cache_file_gen1_load(char const *path);
 void cache_file_gen1_dispose(cache_file *file);
-dword cache_file_gen1_get_base_address(cache_file *file);
+dword cache_file_gen1_get_base_address();
 cache_tag_instance *cache_file_gen1_get_tag_instance(cache_file *file, long index);
 
 long cache_header_gen1_get_file_length(cache_header_gen1 *header);
@@ -71,7 +71,7 @@ dword cache_tag_header_gen1_get_tags_offset(cache_tag_header_gen1 *header);
 
 tag cache_tag_instance_gen1_get_group_tag(cache_tag_instance_gen1 *instance);
 long cache_tag_instance_gen1_get_index(cache_tag_instance_gen1 *instance);
-word cache_tag_instance_gen1_get_name_offset(cache_tag_instance_gen1 *instance);
+dword cache_tag_instance_gen1_get_name_offset(cache_file *file, cache_tag_instance_gen1 *instance);
 dword cache_tag_instance_gen1_get_offset(cache_tag_instance_gen1 *instance);
 
 /* ---------- globals */
@@ -149,8 +149,7 @@ void cache_file_gen1_dispose(
     free(file);
 }
 
-dword cache_file_gen1_get_base_address(
-    cache_file *file)
+dword cache_file_gen1_get_base_address()
 {
     return 0x40440000;
 }
@@ -179,7 +178,7 @@ long cache_header_gen1_get_tag_header_offset(
 long cache_header_gen1_get_tag_buffer_size(
     cache_header_gen1 *header)
 {
-    return header->tag_memory_size;
+    return header->tag_buffer_size;
 }
 
 char const *cache_header_gen1_get_name(
@@ -224,7 +223,8 @@ long cache_tag_instance_gen1_get_index(
     return instance->index;
 }
 
-word cache_tag_instance_gen1_get_name_offset(
+dword cache_tag_instance_gen1_get_name_offset(
+    cache_file *file,
     cache_tag_instance_gen1 *instance)
 {
     return instance->name_offset;

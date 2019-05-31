@@ -2,6 +2,12 @@
 
 /* ---------- types */
 
+typedef void cache_file;
+typedef void cache_header;
+typedef void cache_tag_header;
+typedef void cache_tag_instance;
+typedef void cache_strings;
+
 typedef enum cache_version
 {
     _cache_version_unknown,
@@ -25,17 +31,11 @@ typedef enum cache_type
     NUMBER_OF_CACHE_TYPES
 } cache_type;
 
-typedef void cache_file;
-typedef void cache_header;
-typedef void cache_tag_header;
-typedef void cache_tag_instance;
-typedef void cache_strings;
-
 typedef struct cache_file_functions
 {
     cache_file *(*load)(char const *path);
     void(*dispose)(cache_file *file);
-    dword(*get_base_address)(cache_file *file);
+    dword(*get_base_address)();
     cache_tag_instance *(*get_tag_instance)(cache_file *file, long index);
 } cache_file_functions;
 
@@ -59,7 +59,7 @@ typedef struct cache_tag_instance_functions
 {
     tag(*get_group_tag)(cache_tag_instance *instance);
     long(*get_index)(cache_tag_instance *instance);
-    dword(*get_name_offset)(cache_tag_instance *instance);
+    dword(*get_name_offset)(cache_file *file, cache_tag_instance *instance);
     dword(*get_offset)(cache_tag_instance *instance);
 } cache_tag_instance_functions;
 
@@ -83,7 +83,7 @@ char const *cache_file_get_build(cache_file *file);
 cache_type cache_file_get_type(cache_file *file);
 long cache_file_get_tag_count(cache_file *file);
 dword cache_file_get_tags_offset(cache_file *file);
-tag cache_file_get_tag_group_tag(cache_file *instance);
-char const *cache_file_get_tag_name(cache_file *instance);
-dword cache_file_get_tag_offset(cache_file *instance);
+tag cache_file_get_tag_group_tag(cache_file *file, long index);
+char const *cache_file_get_tag_name(cache_file *file, long index);
+dword cache_file_get_tag_offset(cache_file *file, long index);
 char const *cache_file_get_string(cache_file *file, long index);
