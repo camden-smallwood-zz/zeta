@@ -56,6 +56,19 @@ dword cache_file_get_base_address(
     return 0;
 }
 
+cache_tag_instance *cache_file_get_tag_instance(
+    cache_file *file,
+    long index)
+{
+    cache_version version = cache_file_get_version(file);
+    cache_file_functions *functions = cache_file_functions_get(version);
+
+    if (functions && functions->get_tag_instance)
+        return functions->get_tag_instance(file, index);
+    
+    return 0;
+}
+
 cache_version cache_file_get_version(
     cache_file *file)
 {
@@ -160,13 +173,9 @@ dword cache_file_get_tags_offset(
     return 0;
 }
 
-cache_tag_instance *cache_file_get_tag_instance(
-    cache_file *file,
-    long index)
-{
-    // TODO
-    return 0;
-}
+tag cache_file_get_tag_group_tag(cache_file *instance);
+char const *cache_file_get_tag_name(cache_file *instance);
+dword cache_file_get_tag_offset(cache_file *instance);
 
 char const *cache_file_get_string(
     cache_file *file,

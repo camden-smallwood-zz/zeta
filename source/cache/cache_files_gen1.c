@@ -57,6 +57,7 @@ typedef struct cache_tag_header_gen1
 cache_file *cache_file_gen1_load(char const *path);
 void cache_file_gen1_dispose(cache_file *file);
 dword cache_file_gen1_get_base_address(cache_file *file);
+cache_tag_instance *cache_file_gen1_get_tag_instance(cache_file *file, long index);
 
 long cache_header_gen1_get_file_length(cache_header_gen1 *header);
 long cache_header_gen1_get_tag_header_offset(cache_header_gen1 *header);
@@ -68,13 +69,19 @@ cache_type cache_header_gen1_get_type(cache_header_gen1 *header);
 long cache_tag_header_gen1_get_tag_count(cache_tag_header_gen1 *header);
 dword cache_tag_header_gen1_get_tags_offset(cache_tag_header_gen1 *header);
 
+tag cache_tag_instance_gen1_get_group_tag(cache_tag_instance_gen1 *instance);
+long cache_tag_instance_gen1_get_index(cache_tag_instance_gen1 *instance);
+word cache_tag_instance_gen1_get_name_offset(cache_tag_instance_gen1 *instance);
+dword cache_tag_instance_gen1_get_offset(cache_tag_instance_gen1 *instance);
+
 /* ---------- globals */
 
 cache_file_functions cache_file_gen1_functions =
 {
     cache_file_gen1_load,
     cache_file_gen1_dispose,
-    cache_file_gen1_get_base_address
+    cache_file_gen1_get_base_address,
+    cache_file_gen1_get_tag_instance
 };
 
 cache_header_functions cache_header_gen1_functions =
@@ -91,6 +98,14 @@ cache_tag_header_functions cache_tag_header_gen1_functions =
 {
     cache_tag_header_gen1_get_tag_count,
     cache_tag_header_gen1_get_tags_offset
+};
+
+cache_tag_instance_functions cache_tag_instance_gen1_functions =
+{
+    cache_tag_instance_gen1_get_group_tag,
+    cache_tag_instance_gen1_get_index,
+    cache_tag_instance_gen1_get_name_offset,
+    cache_tag_instance_gen1_get_offset
 };
 
 /* ---------- code */
@@ -115,20 +130,14 @@ cache_file *cache_file_gen1_load(
     dword address_mask = base_address - header->offset_to_index;
 
     tag_header->tags_offset -= address_mask;
-    printf("tags_offset: %lu\n", tag_header->tags_offset);
-
     tag_header->indices_offset += tag_header->vertices_offset;
-
-    cache_tag_instance_gen1 *instances = (cache_tag_instance_gen1 *)(result + tag_header->tags_offset);
 
     for (int i = 0; i < tag_header->count; i++)
     {
-        cache_tag_instance_gen1 *instance = &instances[i];
+        cache_tag_instance_gen1 *instance = cache_file_gen1_get_tag_instance(result, i);
 
         instance->name_offset -= address_mask;
         instance->offset -= address_mask;
-
-        printf("%8X name: %s\n", i, result + instance->name_offset);
     }
 
     return result;
@@ -144,6 +153,15 @@ dword cache_file_gen1_get_base_address(
     cache_file *file)
 {
     return 0x40440000;
+}
+
+cache_tag_instance *cache_file_gen1_get_tag_instance(
+    cache_file *file,
+    long index)
+{
+    cache_header_gen1 *header = file;
+    cache_tag_header_gen1 *tag_header = file + header->offset_to_index;
+    return &((cache_tag_instance_gen1 *)(file + tag_header->tags_offset))[index];
 }
 
 long cache_header_gen1_get_file_length(
@@ -192,4 +210,28 @@ dword cache_tag_header_gen1_get_tags_offset(
     cache_tag_header_gen1 *header)
 {
     return header->tags_offset;
+}
+
+tag cache_tag_instance_gen1_get_group_tag(
+    cache_tag_instance_gen1 *instance)
+{
+    return instance->group_tags[0];
+}
+
+long cache_tag_instance_gen1_get_index(
+    cache_tag_instance_gen1 *instance)
+{
+    return instance->index;
+}
+
+word cache_tag_instance_gen1_get_name_offset(
+    cache_tag_instance_gen1 *instance)
+{
+    return instance->name_offset;
+}
+
+dword cache_tag_instance_gen1_get_offset(
+    cache_tag_instance_gen1 *instance)
+{
+    return instance->offset;
 }
