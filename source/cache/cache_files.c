@@ -5,44 +5,6 @@
 #include <cache/cache_files.h>
 
 #include <stdio.h>
-#include <stdlib.h>
-
-/* ---------- types */
-
-typedef struct cache_file_functions
-{
-    cache_file *(*load)(char const *path);
-    void(*dispose)(cache_file *file);
-} cache_file_functions;
-
-typedef struct cache_header_functions
-{
-    long(*get_file_length)(cache_header *header);
-    long(*get_tag_header_offset)(cache_header *header);
-    long(*get_tag_buffer_size)(cache_header *header);
-    char const *(*get_name)(cache_header *header);
-    char const *(*get_build)(cache_header *header);
-    cache_type(*get_type)(cache_header *header);
-} cache_header_functions;
-
-typedef struct cache_tag_header_functions
-{
-    long(*get_tag_count)(cache_tag_header *header);
-    dword(*get_tags_offset)(cache_tag_header *header);
-} cache_tag_header_functions;
-
-typedef struct cache_tag_instance_functions
-{
-    tag(*get_group_tag)(cache_tag_instance *instance);
-    long(*get_index)(cache_tag_instance *instance);
-    char const *(*get_name)(cache_tag_instance *instance);
-    dword(*get_offset)(cache_tag_instance *instance);
-} cache_tag_instance_functions;
-
-typedef struct cache_strings_functions
-{
-    char const *(*get_string)(cache_strings *strings, long index);
-} cache_strings_functions;
 
 /* ---------- prototypes */
 
@@ -207,11 +169,29 @@ char const *cache_file_get_string(
 
 /* ---------- private code */
 
+cache_file_functions *cache_file_functions_get(
+    cache_version version)
+{
+    extern cache_file_functions cache_file_gen1_functions;
+
+    switch (version)
+    {
+    case _cache_version_gen1:
+        return &cache_file_gen1_functions;
+    default:
+        return 0;
+    }
+}
+
 cache_header_functions *cache_header_functions_get(
     cache_version version)
 {
+    extern cache_header_functions cache_header_gen1_functions;
+
     switch (version)
     {
+    case _cache_version_gen1:
+        return &cache_header_gen1_functions;
     default:
         return 0;
     }
@@ -238,16 +218,6 @@ cache_tag_instance_functions *cache_tag_instance_functions_get(
 }
 
 cache_strings_functions *cache_strings_functions_get(
-    cache_version version)
-{
-    switch (version)
-    {
-    default:
-        return 0;
-    }
-}
-
-cache_file_functions *cache_file_functions_get(
     cache_version version)
 {
     switch (version)

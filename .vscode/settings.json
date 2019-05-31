@@ -10,6 +10,7 @@
         "cache_files.h": "c",
         "cache_files_base.h": "c",
         "stdio.h": "c",
-        "tag_groups_base.h": "c"
+        "tag_groups_base.h": "c",
+        "stdlib.h": "c"
     }
 }
