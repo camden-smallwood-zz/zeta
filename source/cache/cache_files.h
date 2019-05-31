@@ -30,6 +30,7 @@ typedef struct cache_file_functions
 {
     cache_file *(*load)(char const *path);
     void(*dispose)(cache_file *file);
+    dword(*get_base_address)(cache_file *file);
 } cache_file_functions;
 
 typedef void cache_header;
@@ -69,6 +70,7 @@ typedef struct cache_strings_functions
 
 cache_file *cache_file_load(char const *path);
 void cache_file_dispose(cache_file *file);
+dword cache_file_get_base_address(cache_file *file);
 cache_version cache_file_get_version(cache_file *file);
 long cache_file_get_file_length(cache_file *file);
 long cache_file_get_tag_header_offset(cache_file *file);

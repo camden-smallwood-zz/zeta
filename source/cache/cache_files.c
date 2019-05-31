@@ -44,6 +44,18 @@ void cache_file_dispose(
         functions->dispose(file);
 }
 
+dword cache_file_get_base_address(
+    cache_file *file)
+{
+    cache_version version = cache_file_get_version(file);
+    cache_file_functions *functions = cache_file_functions_get(version);
+
+    if (functions && functions->get_base_address)
+        return functions->get_base_address(file);
+    
+    return 0;
+}
+
 cache_version cache_file_get_version(
     cache_file *file)
 {
@@ -126,10 +138,11 @@ long cache_file_get_tag_count(
     cache_file *file)
 {
     cache_version version = cache_file_get_version(file);
+    cache_tag_header *header = file + cache_file_get_tag_header_offset(file);
     cache_tag_header_functions *functions = cache_tag_header_functions_get(version);
     
     if (functions && functions->get_tag_count)
-        return functions->get_tag_count(file);
+        return functions->get_tag_count(header);
     
     return 0;
 }
@@ -138,10 +151,11 @@ dword cache_file_get_tags_offset(
     cache_file *file)
 {
     cache_version version = cache_file_get_version(file);
+    cache_tag_header *header = file + cache_file_get_tag_header_offset(file);
     cache_tag_header_functions *functions = cache_tag_header_functions_get(version);
     
     if (functions && functions->get_tags_offset)
-        return functions->get_tags_offset(file);
+        return functions->get_tags_offset(header);
     
     return 0;
 }
@@ -200,8 +214,12 @@ cache_header_functions *cache_header_functions_get(
 cache_tag_header_functions *cache_tag_header_functions_get(
     cache_version version)
 {
+    extern cache_tag_header_functions cache_tag_header_gen1_functions;
+
     switch (version)
     {
+    case _cache_version_gen1:
+        return &cache_tag_header_gen1_functions;
     default:
         return 0;
     }

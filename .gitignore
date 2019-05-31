@@ -1,2 +1,3 @@
-.vscode/
-bin/
+.vscode/ipch/
+.vscode/settings.json
+bin/zeta.exe
