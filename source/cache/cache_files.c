@@ -25,12 +25,12 @@ cache_file *cache_file_load(
     fseek(stream, 4, SEEK_SET);
     fread(&version, sizeof(long), 1, stream);
     fclose(stream);
-
+    
     cache_file_functions *functions = cache_file_functions_get(version);
 
     if (functions && functions->load)
         return functions->load(path);
-    
+
     return 0;
 }
 
@@ -147,6 +147,18 @@ cache_type cache_file_get_type(
     return _cache_type_none;
 }
 
+cache_shared_type cache_file_get_shared_type(
+    cache_file *file)
+{
+    cache_version version = cache_file_get_version(file);
+    cache_header_functions *functions = cache_header_functions_get(version);
+    
+    if (functions && functions->get_shared_type)
+        return functions->get_shared_type(file);
+    
+    return _cache_shared_type_none;
+}
+
 long cache_file_get_tag_count(
     cache_file *file)
 {
@@ -182,7 +194,7 @@ tag cache_file_get_tag_group_tag(
     cache_tag_instance_functions *functions = cache_tag_instance_functions_get(version);
 
     if (functions && functions->get_group_tag)
-        return functions->get_group_tag(instance);
+        return functions->get_group_tag(file, instance);
     
     return NONE;
 }
@@ -210,7 +222,7 @@ dword cache_file_get_tag_offset(
     cache_tag_instance_functions *functions = cache_tag_instance_functions_get(version);
 
     if (functions && functions->get_offset)
-        return functions->get_offset(instance);
+        return functions->get_offset(file, instance);
     
     return 0;
 }
@@ -235,7 +247,8 @@ cache_file_functions *cache_file_functions_get(
 {
     extern cache_file_functions
         cache_file_gen1_functions,
-        cache_file_gen2_functions;
+        cache_file_gen2_functions,
+        cache_file_gen3_functions;
 
     switch (version)
     {
@@ -243,6 +256,8 @@ cache_file_functions *cache_file_functions_get(
         return &cache_file_gen1_functions;
     case _cache_version_gen2:
         return &cache_file_gen2_functions;
+    case _cache_version_gen3:
+        return &cache_file_gen3_functions;
     default:
         return 0;
     }
@@ -253,7 +268,8 @@ cache_header_functions *cache_header_functions_get(
 {
     extern cache_header_functions
         cache_header_gen1_functions,
-        cache_header_gen2_functions;
+        cache_header_gen2_functions,
+        cache_header_gen3_functions;
 
     switch (version)
     {
@@ -261,6 +277,8 @@ cache_header_functions *cache_header_functions_get(
         return &cache_header_gen1_functions;
     case _cache_version_gen2:
         return &cache_header_gen2_functions;
+    case _cache_version_gen3:
+        return &cache_header_gen3_functions;
     default:
         return 0;
     }
@@ -271,7 +289,8 @@ cache_tag_header_functions *cache_tag_header_functions_get(
 {
     extern cache_tag_header_functions
         cache_tag_header_gen1_functions,
-        cache_tag_header_gen2_functions;
+        cache_tag_header_gen2_functions,
+        cache_tag_header_gen3_functions;
 
     switch (version)
     {
@@ -279,6 +298,8 @@ cache_tag_header_functions *cache_tag_header_functions_get(
         return &cache_tag_header_gen1_functions;
     case _cache_version_gen2:
         return &cache_tag_header_gen2_functions;
+    case _cache_version_gen3:
+        return &cache_tag_header_gen3_functions;
     default:
         return 0;
     }
@@ -289,7 +310,8 @@ cache_tag_instance_functions *cache_tag_instance_functions_get(
 {
     extern cache_tag_instance_functions
         cache_tag_instance_gen1_functions,
-        cache_tag_instance_gen2_functions;
+        cache_tag_instance_gen2_functions,
+        cache_tag_instance_gen3_functions;
 
     switch (version)
     {
@@ -297,6 +319,8 @@ cache_tag_instance_functions *cache_tag_instance_functions_get(
         return &cache_tag_instance_gen1_functions;
     case _cache_version_gen2:
         return &cache_tag_instance_gen2_functions;
+    case _cache_version_gen3:
+        return &cache_tag_instance_gen3_functions;
     default:
         return 0;
     }

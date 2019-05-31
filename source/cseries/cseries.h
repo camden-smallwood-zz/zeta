@@ -37,8 +37,6 @@ enum
 
 /* ---------- types */
 
-typedef enum { FALSE, TRUE } boolean;
-
 typedef unsigned char byte;
 typedef unsigned short word;
 typedef unsigned long dword;

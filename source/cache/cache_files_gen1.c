@@ -4,6 +4,7 @@
 #include <cseries/cseries.h>
 #include <cache/cache_files.h>
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,7 +49,9 @@ typedef struct cache_tag_instance_gen1
     long index;
     dword name_offset;
     dword offset;
-    boolean external;
+    bool external;
+    char : 8;
+    short : 16;
     long : 32;
 } cache_tag_instance_gen1;
 
@@ -57,7 +60,7 @@ typedef struct cache_tag_instance_gen1
 cache_file *cache_file_gen1_load(char const *path);
 void cache_file_gen1_dispose(cache_file *file);
 dword cache_file_gen1_get_base_address();
-cache_tag_instance *cache_file_gen1_get_tag_instance(cache_file *file, long index);
+cache_tag_instance_gen1 *cache_file_gen1_get_tag_instance(cache_file *file, long index);
 
 long cache_header_gen1_get_file_length(cache_header_gen1 *header);
 long cache_header_gen1_get_tag_header_offset(cache_header_gen1 *header);
@@ -65,14 +68,15 @@ long cache_header_gen1_get_tag_buffer_size(cache_header_gen1 *header);
 char const *cache_header_gen1_get_name(cache_header_gen1 *header);
 char const *cache_header_gen1_get_build(cache_header_gen1 *header);
 cache_type cache_header_gen1_get_type(cache_header_gen1 *header);
+cache_shared_type cache_header_gen1_get_shared_type(cache_header_gen1 *header);
 
 long cache_tag_header_gen1_get_tag_count(cache_tag_header_gen1 *header);
 dword cache_tag_header_gen1_get_tags_offset(cache_tag_header_gen1 *header);
 
-tag cache_tag_instance_gen1_get_group_tag(cache_tag_instance_gen1 *instance);
-long cache_tag_instance_gen1_get_index(cache_tag_instance_gen1 *instance);
+tag cache_tag_instance_gen1_get_group_tag(cache_file *file, cache_tag_instance_gen1 *instance);
+long cache_tag_instance_gen1_get_index(cache_file *file, cache_tag_instance_gen1 *instance);
 dword cache_tag_instance_gen1_get_name_offset(cache_file *file, cache_tag_instance_gen1 *instance);
-dword cache_tag_instance_gen1_get_offset(cache_tag_instance_gen1 *instance);
+dword cache_tag_instance_gen1_get_offset(cache_file *file, cache_tag_instance_gen1 *instance);
 
 /* ---------- globals */
 
@@ -91,7 +95,8 @@ cache_header_functions cache_header_gen1_functions =
     cache_header_gen1_get_tag_buffer_size,
     cache_header_gen1_get_name,
     cache_header_gen1_get_build,
-    cache_header_gen1_get_type
+    cache_header_gen1_get_type,
+    cache_header_gen1_get_shared_type
 };
 
 cache_tag_header_functions cache_tag_header_gen1_functions =
@@ -154,7 +159,7 @@ dword cache_file_gen1_get_base_address()
     return 0x40440000;
 }
 
-cache_tag_instance *cache_file_gen1_get_tag_instance(
+cache_tag_instance_gen1 *cache_file_gen1_get_tag_instance(
     cache_file *file,
     long index)
 {
@@ -199,6 +204,12 @@ cache_type cache_header_gen1_get_type(
     return header->type;
 }
 
+cache_shared_type cache_header_gen1_get_shared_type(
+    cache_header_gen1 *header)
+{
+    return _cache_shared_type_none;
+}
+
 long cache_tag_header_gen1_get_tag_count(
     cache_tag_header_gen1 *header)
 {
@@ -212,12 +223,14 @@ dword cache_tag_header_gen1_get_tags_offset(
 }
 
 tag cache_tag_instance_gen1_get_group_tag(
+    cache_file *file,
     cache_tag_instance_gen1 *instance)
 {
     return instance->group_tags[0];
 }
 
 long cache_tag_instance_gen1_get_index(
+    cache_file *file,
     cache_tag_instance_gen1 *instance)
 {
     return instance->index;
@@ -231,6 +244,7 @@ dword cache_tag_instance_gen1_get_name_offset(
 }
 
 dword cache_tag_instance_gen1_get_offset(
+    cache_file *file,
     cache_tag_instance_gen1 *instance)
 {
     return instance->offset;

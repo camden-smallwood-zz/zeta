@@ -31,6 +31,15 @@ typedef enum cache_type
     NUMBER_OF_CACHE_TYPES
 } cache_type;
 
+typedef enum cache_shared_type
+{
+    _cache_shared_type_none= NONE,
+    _cache_shared_type_ui,
+    _cache_shared_type_shared,
+    _cache_shared_type_campaign,
+    NUMBER_OF_CACHE_SHARED_TYPES
+} cache_shared_type;
+
 typedef struct cache_file_functions
 {
     cache_file *(*load)(char const *path);
@@ -47,6 +56,7 @@ typedef struct cache_header_functions
     char const *(*get_name)(cache_header *header);
     char const *(*get_build)(cache_header *header);
     cache_type(*get_type)(cache_header *header);
+    cache_shared_type(*get_shared_type)(cache_header *header);
 } cache_header_functions;
 
 typedef struct cache_tag_header_functions
@@ -57,10 +67,10 @@ typedef struct cache_tag_header_functions
 
 typedef struct cache_tag_instance_functions
 {
-    tag(*get_group_tag)(cache_tag_instance *instance);
-    long(*get_index)(cache_tag_instance *instance);
+    tag(*get_group_tag)(cache_file *file, cache_tag_instance *instance);
+    long(*get_index)(cache_file *file, cache_tag_instance *instance);
     dword(*get_name_offset)(cache_file *file, cache_tag_instance *instance);
-    dword(*get_offset)(cache_tag_instance *instance);
+    dword(*get_offset)(cache_file *file, cache_tag_instance *instance);
 } cache_tag_instance_functions;
 
 typedef struct cache_strings_functions
@@ -81,6 +91,7 @@ long cache_file_get_tag_buffer_size(cache_file *file);
 char const *cache_file_get_name(cache_file *file);
 char const *cache_file_get_build(cache_file *file);
 cache_type cache_file_get_type(cache_file *file);
+cache_shared_type cache_file_get_shared_type(cache_file *file);
 long cache_file_get_tag_count(cache_file *file);
 dword cache_file_get_tags_offset(cache_file *file);
 tag cache_file_get_tag_group_tag(cache_file *file, long index);
