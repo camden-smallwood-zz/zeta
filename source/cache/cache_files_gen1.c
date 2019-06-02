@@ -80,7 +80,7 @@ dword cache_tag_instance_gen1_get_offset(cache_file *file, cache_tag_instance_ge
 
 /* ---------- globals */
 
-cache_file_functions cache_file_gen1_functions =
+cache_file_definition cache_file_gen1_definition =
 {
     cache_file_gen1_load,
     cache_file_gen1_dispose,
@@ -88,7 +88,7 @@ cache_file_functions cache_file_gen1_functions =
     cache_file_gen1_get_tag_instance
 };
 
-cache_header_functions cache_header_gen1_functions =
+cache_header_definition cache_header_gen1_definition =
 {
     cache_header_gen1_get_file_length,
     cache_header_gen1_get_tag_header_offset,
@@ -99,13 +99,13 @@ cache_header_functions cache_header_gen1_functions =
     cache_header_gen1_get_shared_type
 };
 
-cache_tag_header_functions cache_tag_header_gen1_functions =
+cache_tag_header_definition cache_tag_header_gen1_definition =
 {
     cache_tag_header_gen1_get_tag_count,
     cache_tag_header_gen1_get_tags_offset
 };
 
-cache_tag_instance_functions cache_tag_instance_gen1_functions =
+cache_tag_instance_definition cache_tag_instance_gen1_definition =
 {
     cache_tag_instance_gen1_get_group_tag,
     cache_tag_instance_gen1_get_index,

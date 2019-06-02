@@ -16,6 +16,7 @@ typedef enum cache_version
     _cache_version_gen2= 8,
     _cache_version_gen3= 11,
     _cache_version_gen4= 12,
+    NUMBER_OF_CACHE_VERSIONS= 6
 } cache_version;
 
 typedef enum cache_type
@@ -40,15 +41,15 @@ typedef enum cache_shared_type
     NUMBER_OF_CACHE_SHARED_TYPES
 } cache_shared_type;
 
-typedef struct cache_file_functions
+typedef struct cache_file_definition
 {
     cache_file *(*load)(char const *path);
     void(*dispose)(cache_file *file);
     dword(*get_base_address)();
     cache_tag_instance *(*get_tag_instance)(cache_file *file, long index);
-} cache_file_functions;
+} cache_file_definition;
 
-typedef struct cache_header_functions
+typedef struct cache_header_definition
 {
     long(*get_file_length)(cache_header *header);
     long(*get_tag_header_offset)(cache_header *header);
@@ -57,26 +58,26 @@ typedef struct cache_header_functions
     char const *(*get_build)(cache_header *header);
     cache_type(*get_type)(cache_header *header);
     cache_shared_type(*get_shared_type)(cache_header *header);
-} cache_header_functions;
+} cache_header_definition;
 
-typedef struct cache_tag_header_functions
+typedef struct cache_tag_header_definition
 {
     long(*get_tag_count)(cache_tag_header *header);
     dword(*get_tags_offset)(cache_tag_header *header);
-} cache_tag_header_functions;
+} cache_tag_header_definition;
 
-typedef struct cache_tag_instance_functions
+typedef struct cache_tag_instance_definition
 {
     tag(*get_group_tag)(cache_file *file, cache_tag_instance *instance);
     long(*get_index)(cache_file *file, cache_tag_instance *instance);
     dword(*get_name_offset)(cache_file *file, cache_tag_instance *instance);
     dword(*get_offset)(cache_file *file, cache_tag_instance *instance);
-} cache_tag_instance_functions;
+} cache_tag_instance_definition;
 
-typedef struct cache_strings_functions
+typedef struct cache_strings_definition
 {
     char const *(*get_string)(cache_strings *strings, long index);
-} cache_strings_functions;
+} cache_strings_definition;
 
 /* ---------- prototypes/CACHE_FILES.C */
 
