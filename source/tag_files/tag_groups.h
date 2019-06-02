@@ -8,7 +8,7 @@
 	{ \
 		#NAME, \
 		(SIZE), \
-		_##NAME##_fields \
+		&_##NAME##_fields[0] \
 	}; \
 	field_definition _##NAME##_fields[] =
 
@@ -130,3 +130,9 @@ typedef struct array_definition
 	long length;
 	void *definition;
 } array_definition;
+
+/* ---------- prototypes/TAG_GROUPS.C */
+
+long field_byteswap(field_type type, cache_version version, void *definition, void *address);
+long struct_byteswap(struct_definition *definition, cache_version version, void *address);
+long array_byteswap(array_definition *definition, cache_version version, void *address);

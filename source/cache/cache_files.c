@@ -197,7 +197,7 @@ cache_version cache_file_get_version(
     cache_file *file)
 {
     tag header_tag = *(tag *)file;
-    cache_version version = *(cache_version *)(file + 4);
+    cache_version version = *(cache_version *)((char *)file + 4);
 
     if (header_tag == 'daeh')
         version = _byteswap_ulong(version);
@@ -293,7 +293,7 @@ long cache_file_get_tag_count(
     cache_file *file)
 {
     cache_version version = cache_file_get_version(file);
-    cache_tag_header *header = file + cache_file_get_tag_header_offset(file);
+    cache_tag_header *header = (char *)file + cache_file_get_tag_header_offset(file);
     cache_tag_header_definition *definition = cache_tag_header_definition_get(version);
     
     if (definition && definition->get_tag_count)
@@ -306,7 +306,7 @@ dword cache_file_get_tags_offset(
     cache_file *file)
 {
     cache_version version = cache_file_get_version(file);
-    cache_tag_header *header = file + cache_file_get_tag_header_offset(file);
+    cache_tag_header *header = (char *)file + cache_file_get_tag_header_offset(file);
     cache_tag_header_definition *definition = cache_tag_header_definition_get(version);
     
     if (definition && definition->get_tags_offset)
@@ -338,7 +338,7 @@ char const *cache_file_get_tag_name(
     cache_tag_instance_definition *definition = cache_tag_instance_definition_get(version);
 
     if (definition && definition->get_name_offset)
-        return file + definition->get_name_offset(file, instance);
+        return (char *)file + definition->get_name_offset(file, instance);
     
     return 0;
 }

@@ -72,7 +72,6 @@ typedef struct cache_header_gen2
     char unknown4[1320];
     tag footer_signature;
 } cache_header_gen2;
-_Static_assert(sizeof(cache_header_gen2) == 0x800, "invalid cache_header_gen2 size");
 
 typedef struct cache_tag_header_gen2
 {
@@ -168,7 +167,7 @@ cache_file *cache_file_gen2_load(
     fread(result, size, 1, stream);
 
     cache_header_gen2 *header = result;
-    cache_tag_header_gen2 *tag_header = result + header->offset_to_index;
+    cache_tag_header_gen2 *tag_header = (char *)result + header->offset_to_index;
     
     dword base_address = cache_file_gen2_get_base_address(result);
     dword address_mask = base_address - header->offset_to_index;
@@ -204,8 +203,8 @@ cache_tag_instance_gen2 *cache_file_gen2_get_tag_instance(
     long index)
 {
     cache_header_gen2 *header = file;
-    cache_tag_header_gen2 *tag_header = file + header->offset_to_index;
-    return &((cache_tag_instance_gen2 *)(file + tag_header->tags_offset))[index];
+    cache_tag_header_gen2 *tag_header = (char *)file + header->offset_to_index;
+    return &((cache_tag_instance_gen2 *)((char *)file + tag_header->tags_offset))[index];
 }
 
 long cache_header_gen2_get_file_length(
@@ -282,7 +281,7 @@ dword cache_tag_instance_gen2_get_name_offset(
 {
     cache_header_gen2 *header = file;
     
-    long *name_offsets = file + header->tag_names_indices_offset;
+    long *name_offsets = (char *)file + header->tag_names_indices_offset;
     long name_offset = name_offsets[instance->index & 0xFFFF];
     
     if (name_offset == NONE)

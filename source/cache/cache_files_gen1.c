@@ -129,7 +129,7 @@ cache_file *cache_file_gen1_load(
     fread(result, size, 1, stream);
 
     cache_header_gen1 *header = result;
-    cache_tag_header_gen1 *tag_header = result + header->offset_to_index;
+    cache_tag_header_gen1 *tag_header = (char *)result + header->offset_to_index;
     
     dword base_address = cache_file_gen1_get_base_address(result);
     dword address_mask = base_address - header->offset_to_index;
@@ -164,8 +164,8 @@ cache_tag_instance_gen1 *cache_file_gen1_get_tag_instance(
     long index)
 {
     cache_header_gen1 *header = file;
-    cache_tag_header_gen1 *tag_header = file + header->offset_to_index;
-    return &((cache_tag_instance_gen1 *)(file + tag_header->tags_offset))[index];
+    cache_tag_header_gen1 *tag_header = (char *)file + header->offset_to_index;
+    return &((cache_tag_instance_gen1 *)((char *)file + tag_header->tags_offset))[index];
 }
 
 long cache_header_gen1_get_file_length(

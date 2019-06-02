@@ -60,9 +60,10 @@ TAG_ARRAY(_field_struct, cache_header_gen3_partitions_array, NUMBER_OF_CACHE_PAR
 TAG_ARRAY(_field_long_integer, cache_header_gen3_sha1_array, 5);
 TAG_ARRAY(_field_long_integer, cache_header_gen3_rsa_array, 64);
 TAG_ARRAY(_field_long_integer, cache_header_gen3_guid_array, 4);
-TAG_ARRAY(_field_long_integer, cache_header_gen3_elements1_array, 0x2300);
-TAG_ARRAY(_field_long_integer, cache_header_gen3_elements2_array, 0x708);
-TAG_ARRAY(_field_long_integer, cache_header_gen3_elements3_array, 0x12C);
+
+long const cache_header_gen3_elements1_length = 0x2300;
+long const cache_header_gen3_elements2_length = 0x708;
+long const cache_header_gen3_elements3_length = 0x12C;
 
 extern enum_definition cache_version_enum;
 extern enum_definition cache_type_enum;
@@ -137,9 +138,9 @@ TAG_STRUCT(cache_header_gen3_struct, sizeof(cache_header_gen3))
     { _field_short_integer, "" },
     { _field_long_integer, "" },
     { _field_array, "compression_guid", &cache_header_gen3_guid_array },
-    { _field_array, "elements1", &cache_header_gen3_elements1_array },
-    { _field_array, "elements2", &cache_header_gen3_elements2_array },
-    { _field_array, "elements3", &cache_header_gen3_elements3_array },
+    { _field_padding, "elements1", &cache_header_gen3_elements1_length },
+    { _field_padding, "elements2", &cache_header_gen3_elements2_length },
+    { _field_padding, "elements3", &cache_header_gen3_elements3_length },
     { _field_long_integer, "" },
     { _field_tag, "footer_signature" },
     { _field_terminator }
@@ -218,9 +219,8 @@ cache_file *cache_file_gen3_load(
     fseek(stream, 0, SEEK_SET);
     fread(result, size, 1, stream);
 
-    /*
-        TODO: apply fixups
-    */
+    cache_header_gen3 *header = result;
+    struct_byteswap(&cache_header_gen3_struct, _cache_version_gen3, header);
 
     return result;
 }
@@ -241,9 +241,9 @@ cache_tag_instance_gen3 *cache_file_gen3_get_tag_instance(
     long index)
 {
     cache_header_gen3 *header = file;
-    cache_tag_header_gen3 *tag_header = file + header->offset_to_index;
+    cache_tag_header_gen3 *tag_header = (char *)file + header->offset_to_index;
     cache_tag_instance_gen3 *tag_instances =
-        (cache_tag_instance_gen3 *)(file + tag_header->tags_offset);
+        (cache_tag_instance_gen3 *)((char *)file + tag_header->tags_offset);
     
     return &tag_instances[index];
 }
@@ -388,7 +388,7 @@ tag cache_tag_instance_gen3_get_group_tag(
         return NONE;
 
     cache_tag_header_gen3 *tag_header = cache_header_gen3_get_tag_header_offset(file);
-    return *(tag *)(file + tag_header->group_tags_offset + 12 * instance->group_index);
+    return *(tag *)((char *)file + tag_header->group_tags_offset + 12 * instance->group_index);
 }
 
 long cache_tag_instance_gen3_get_index(
@@ -414,7 +414,7 @@ dword cache_tag_instance_gen3_get_name_offset(
 {
     cache_header_gen3 *header = file;
     
-    long *name_offsets = file + header->tag_names_indices_offset;
+    long *name_offsets = (char *)file + header->tag_names_indices_offset;
     long index = cache_tag_instance_gen3_get_index(file, instance);
     long name_offset = name_offsets[index & 0xFFFF];
     
