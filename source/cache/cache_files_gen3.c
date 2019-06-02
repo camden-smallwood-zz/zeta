@@ -62,7 +62,8 @@ typedef struct cache_header_gen3
     dword tag_buffer_size;
     long_string source_file;
     tag_string build;
-    cache_type type;
+    cache_type type : 16;
+    cache_shared_type shared_type : 16;
     char : 8;
     bool tracked_build;
     char : 8;
@@ -125,6 +126,7 @@ typedef struct cache_header_gen3
     long : 32;
     tag footer_signature;
 } cache_header_gen3;
+_Static_assert(sizeof(cache_header_gen3) == 0x3000, "invalid cache_header_gen3 size");
 
 typedef struct cache_tag_header_gen3
 {
@@ -161,14 +163,17 @@ char const *cache_header_gen3_get_name(cache_header_gen3 *header);
 char const *cache_header_gen3_get_build(cache_header_gen3 *header);
 cache_type cache_header_gen3_get_type(cache_header_gen3 *header);
 cache_shared_type cache_header_gen3_get_shared_type(cache_header_gen3 *header);
+void cache_header_gen3_byteswap(cache_header_gen3 *header);
 
 long cache_tag_header_gen3_get_tag_count(cache_tag_header_gen3 *header);
 dword cache_tag_header_gen3_get_tags_offset(cache_tag_header_gen3 *header);
+void cache_tag_header_gen3_byteswap(cache_tag_header_gen3 *header);
 
 tag cache_tag_instance_gen3_get_group_tag(cache_file *file, cache_tag_instance_gen3 *instance);
 long cache_tag_instance_gen3_get_index(cache_file *file, cache_tag_instance_gen3 *instance);
 dword cache_tag_instance_gen3_get_name_offset(cache_file *file, cache_tag_instance_gen3 *instance);
 dword cache_tag_instance_gen3_get_offset(cache_file *file, cache_tag_instance_gen3 *instance);
+void cache_tag_instance_gen3_byteswap(cache_tag_instance_gen3 *instance);
 
 /* ---------- globals */
 
@@ -221,9 +226,15 @@ cache_file *cache_file_gen3_load(
     fread(result, size, 1, stream);
 
     cache_header_gen3 *header = result;
+    cache_header_gen3_byteswap(header);
+
     dword address_mask = 0;
 
-    if (header->string_id_indices_offset && header->string_id_indices_offset != NONE)
+    if (header->interop.resource_base_address == 0)
+    {
+        address_mask = (long)(header->interop.runtime_base_address - header->tag_buffer_size);
+    }
+    else
     {
         long value = header->string_id_indices_offset - sizeof(cache_header_gen3);
 
@@ -232,17 +243,21 @@ cache_file *cache_file_gen3_load(
         header->string_id_buffer_offset -= value;
         header->tag_names_buffer_offset -= value;
         header->tag_names_indices_offset -= value;
+
+        address_mask = *(long *)&header->partitions[_cache_partition_type_resources].base_address - (*(long *)&header->interop.debug_section_size + *(long *)&header->interop.sections[_cache_section_type_resource].size);
     }
 
     if (header->type != _cache_type_shared && header->type != _cache_type_shared_campaign)
     {
-        dword base_address = cache_file_gen3_get_base_address(result);
-        address_mask = base_address - (header->interop.debug_section_size + header->interop.sections[_cache_section_type_resource].size);
+        //
+        // TODO: fix this
+        //
 
         header->offset_to_index -= address_mask;
-        
+     
         cache_tag_header_gen3 *tag_header = result + header->offset_to_index;
-        
+        cache_tag_header_gen3_byteswap(tag_header);
+     
         tag_header->group_tags_offset -= address_mask;
         tag_header->tags_offset -= address_mask;
         tag_header->dependent_tags_offset -= address_mask;
@@ -250,6 +265,8 @@ cache_file *cache_file_gen3_load(
         for (int i = 0; i < tag_header->count; i++)
         {
             cache_tag_instance_gen3 *instance = cache_file_gen3_get_tag_instance(result, i);
+            cache_tag_instance_gen3_byteswap(instance);
+
             instance->offset -= address_mask;
         }
     }
@@ -275,6 +292,69 @@ cache_tag_instance_gen3 *cache_file_gen3_get_tag_instance(
     cache_header_gen3 *header = file;
     cache_tag_header_gen3 *tag_header = file + header->offset_to_index;
     return &((cache_tag_instance_gen3 *)(file + tag_header->tags_offset))[index];
+}
+
+void cache_header_gen3_byteswap(
+    cache_header_gen3 *header)
+{
+    int i;
+    header->header_signature = _byteswap_ulong(header->header_signature);
+    header->version = _byteswap_ulong(header->version);
+    header->file_length = _byteswap_ulong(header->file_length);
+    header->compressed_file_length = _byteswap_ulong(header->compressed_file_length);
+    header->offset_to_index = _byteswap_ulong(header->offset_to_index);
+    header->index_stream_size = _byteswap_ulong(header->index_stream_size);
+    header->tag_buffer_size = _byteswap_ulong(header->tag_buffer_size);
+    header->type = _byteswap_ushort(header->type);
+    header->shared_type = _byteswap_ushort(header->shared_type);
+    header->string_id_count = _byteswap_ulong(header->string_id_count);
+    header->string_id_buffer_size = _byteswap_ulong(header->string_id_buffer_size);
+    header->string_id_indices_offset = _byteswap_ulong(header->string_id_indices_offset);
+    header->string_id_buffer_offset = _byteswap_ulong(header->string_id_buffer_offset);
+    header->external_dependencies = _byteswap_ulong(header->external_dependencies);
+    header->high_date_time = _byteswap_ulong(header->high_date_time);
+    header->low_date_time = _byteswap_ulong(header->low_date_time);
+    header->ui_high_date_time = _byteswap_ulong(header->ui_high_date_time);
+    header->ui_low_date_time = _byteswap_ulong(header->ui_low_date_time);
+    header->shared_high_date_time = _byteswap_ulong(header->shared_high_date_time);
+    header->shared_low_date_time = _byteswap_ulong(header->shared_low_date_time);
+    header->campaign_high_date_time = _byteswap_ulong(header->campaign_high_date_time);
+    header->campaign_low_date_time = _byteswap_ulong(header->campaign_low_date_time);
+    header->minor_version = _byteswap_ulong(header->minor_version);
+    header->tag_names_count = _byteswap_ulong(header->tag_names_count);
+    header->tag_names_buffer_offset = _byteswap_ulong(header->tag_names_buffer_offset);
+    header->tag_names_buffer_size = _byteswap_ulong(header->tag_names_buffer_size);
+    header->tag_names_indices_offset = _byteswap_ulong(header->tag_names_indices_offset);
+    header->checksum = _byteswap_ulong(header->checksum);
+    header->base_address = _byteswap_ulong(header->base_address);
+    header->xdk_version = _byteswap_ulong(header->xdk_version);
+    for (i = 0; i < NUMBER_OF_CACHE_PARTITIONS; i++)
+    {
+        header->partitions[i].base_address = _byteswap_ulong(header->partitions[i].base_address);
+        header->partitions[i].size = _byteswap_ulong(header->partitions[i].size);
+    }
+    for (i = 0; i < 5; i++)
+        header->sha1_a[i] = _byteswap_ulong(header->sha1_a[i]);
+    for (i = 0; i < 5; i++)
+        header->sha1_b[i] = _byteswap_ulong(header->sha1_b[i]);
+    for (i = 0; i < 5; i++)
+        header->sha1_c[i] = _byteswap_ulong(header->sha1_c[i]);
+    for (i = 0; i < 64; i++)
+        header->rsa[i] = _byteswap_ulong(header->rsa[i]);
+    header->interop.resource_base_address = _byteswap_ulong(header->interop.resource_base_address);
+    header->interop.debug_section_size = _byteswap_ulong(header->interop.debug_section_size);
+    header->interop.runtime_base_address = _byteswap_ulong(header->interop.runtime_base_address);
+    header->interop.unknown_base_address = _byteswap_ulong(header->interop.unknown_base_address);
+    for (i = 0; i < NUMBER_OF_CACHE_SECTIONS; i++)
+    {
+        header->interop.sections[i].virtual_address = _byteswap_ulong(header->interop.sections[i].virtual_address);
+        header->interop.sections[i].size = _byteswap_ulong(header->interop.sections[i].size);
+    }
+    for (i = 0; i < 4; i++)
+        header->guid[i] = _byteswap_ulong(header->guid[i]);
+    for (i = 0; i < 4; i++)
+        header->compression_guid[i] = _byteswap_ulong(header->compression_guid[i]);
+    header->footer_signature = _byteswap_ulong(header->footer_signature);
 }
 
 long cache_header_gen3_get_file_length(
@@ -331,11 +411,26 @@ dword cache_tag_header_gen3_get_tags_offset(
     return header->tags_offset;
 }
 
+void cache_tag_header_gen3_byteswap(
+    cache_tag_header_gen3 *header)
+{
+    header->group_tags_offset = _byteswap_ulong(header->group_tags_offset);
+    header->group_tags_count = _byteswap_ulong(header->group_tags_count);
+    header->count = _byteswap_ulong(header->count);
+    header->tags_offset = _byteswap_ulong(header->tags_offset);
+    header->dependent_tags_count = _byteswap_ulong(header->dependent_tags_count);
+    header->dependent_tags_offset = _byteswap_ulong(header->dependent_tags_offset);
+    header->dependent_tags_count2 = _byteswap_ulong(header->dependent_tags_count2);
+    header->dependent_tags_offset2 = _byteswap_ulong(header->dependent_tags_offset2);
+    header->checksum = _byteswap_ulong(header->checksum);
+    header->signature = _byteswap_ulong(header->signature);
+}
+
 tag cache_tag_instance_gen3_get_group_tag(
     cache_file *file,
     cache_tag_instance_gen3 *instance)
 {
-    if (instance->group_index == NONE)
+    if (instance->group_index == (word)NONE)
         return NONE;
 
     cache_tag_header_gen3 *tag_header = cache_header_gen3_get_tag_header_offset(file);
@@ -380,4 +475,12 @@ dword cache_tag_instance_gen3_get_offset(
     cache_tag_instance_gen3 *instance)
 {
     return instance->offset;
+}
+
+void cache_tag_instance_gen3_byteswap(
+    cache_tag_instance_gen3 *instance)
+{
+    instance->identifier = _byteswap_ushort(instance->identifier);
+    instance->group_index = _byteswap_ushort(instance->group_index);
+    instance->offset = _byteswap_ulong(instance->offset);
 }

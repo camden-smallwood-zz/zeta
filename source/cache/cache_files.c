@@ -5,6 +5,7 @@
 #include <cache/cache_files.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* ---------- prototypes */
 
@@ -19,12 +20,16 @@ cache_strings_functions *cache_strings_functions_get(cache_version version);
 cache_file *cache_file_load(
     char const *path)
 {
+    tag header_tag = NONE;
     cache_version version = _cache_version_unknown;
     
     FILE *stream = fopen(path, "rb");
-    fseek(stream, 4, SEEK_SET);
+    fread(&header_tag, sizeof(tag), 1, stream);
     fread(&version, sizeof(long), 1, stream);
     fclose(stream);
+
+    if (header_tag == 'daeh')
+        version = _byteswap_ulong(version);
     
     cache_file_functions *functions = cache_file_functions_get(version);
 
@@ -72,7 +77,13 @@ cache_tag_instance *cache_file_get_tag_instance(
 cache_version cache_file_get_version(
     cache_file *file)
 {
-    return *(cache_version *)(file + 4);
+    tag header_tag = *(tag *)file;
+    cache_version version = *(cache_version *)(file + 4);
+
+    if (header_tag == 'daeh')
+        version = _byteswap_ulong(version);
+    
+    return version;
 }
 
 long cache_file_get_file_length(
