@@ -218,51 +218,9 @@ cache_file *cache_file_gen3_load(
     fseek(stream, 0, SEEK_SET);
     fread(result, size, 1, stream);
 
-    cache_header_gen3 *header = result;
-    cache_header_gen3_byteswap(header);
-
-    dword address_mask = 0;
-
-    if (header->interop.resource_base_address == 0)
-    {
-        address_mask = (long)(header->interop.runtime_base_address - header->tag_buffer_size);
-    }
-    else
-    {
-        long value = header->string_id_indices_offset - sizeof(cache_header_gen3);
-
-        header->index_stream_size -= value;
-        header->string_id_indices_offset -= value;
-        header->string_id_buffer_offset -= value;
-        header->tag_names_buffer_offset -= value;
-        header->tag_names_indices_offset -= value;
-
-        address_mask = *(long *)&header->partitions[_cache_partition_type_resources].base_address - (*(long *)&header->interop.debug_section_size + *(long *)&header->interop.sections[_cache_section_type_resource].size);
-    }
-
-    if (header->type != _cache_type_shared && header->type != _cache_type_shared_campaign)
-    {
-        //
-        // TODO: fix this
-        //
-
-        header->offset_to_index -= address_mask;
-     
-        cache_tag_header_gen3 *tag_header = result + header->offset_to_index;
-        cache_tag_header_gen3_byteswap(tag_header);
-     
-        tag_header->group_tags_offset -= address_mask;
-        tag_header->tags_offset -= address_mask;
-        tag_header->dependent_tags_offset -= address_mask;
-        
-        for (int i = 0; i < tag_header->count; i++)
-        {
-            cache_tag_instance_gen3 *instance = cache_file_gen3_get_tag_instance(result, i);
-            cache_tag_instance_gen3_byteswap(instance);
-
-            instance->offset -= address_mask;
-        }
-    }
+    /*
+        TODO: apply fixups
+    */
 
     return result;
 }
@@ -284,7 +242,10 @@ cache_tag_instance_gen3 *cache_file_gen3_get_tag_instance(
 {
     cache_header_gen3 *header = file;
     cache_tag_header_gen3 *tag_header = file + header->offset_to_index;
-    return &((cache_tag_instance_gen3 *)(file + tag_header->tags_offset))[index];
+    cache_tag_instance_gen3 *tag_instances =
+        (cache_tag_instance_gen3 *)(file + tag_header->tags_offset);
+    
+    return &tag_instances[index];
 }
 
 void cache_header_gen3_byteswap(

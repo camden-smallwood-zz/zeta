@@ -81,6 +81,12 @@ typedef struct cache_strings_definition
 
 /* ---------- prototypes/CACHE_FILES.C */
 
+cache_file_definition *cache_file_definition_get(cache_version version);
+cache_header_definition *cache_header_definition_get(cache_version version);
+cache_tag_header_definition *cache_tag_header_definition_get(cache_version version);
+cache_tag_instance_definition *cache_tag_instance_definition_get(cache_version version);
+cache_strings_definition *cache_strings_definition_get(cache_version version);
+
 cache_file *cache_file_load(char const *path);
 void cache_file_dispose(cache_file *file);
 dword cache_file_get_base_address(cache_file *file);

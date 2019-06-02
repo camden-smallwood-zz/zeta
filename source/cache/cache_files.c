@@ -40,15 +40,101 @@ TAG_ENUM(cache_shared_type_enum, NUMBER_OF_CACHE_SHARED_TYPES + 1)
     { "campaign", _cache_shared_type_campaign }
 };
 
-/* ---------- prototypes */
+/* ---------- code */
 
-cache_file_definition *cache_file_definition_get(cache_version version);
-cache_header_definition *cache_header_definition_get(cache_version version);
-cache_tag_header_definition *cache_tag_header_definition_get(cache_version version);
-cache_tag_instance_definition *cache_tag_instance_definition_get(cache_version version);
-cache_strings_definition *cache_strings_definition_get(cache_version version);
+cache_file_definition *cache_file_definition_get(
+    cache_version version)
+{
+    extern cache_file_definition
+        cache_file_gen1_definition,
+        cache_file_gen2_definition,
+        cache_file_gen3_definition;
 
-/* ---------- public code */
+    switch (version)
+    {
+    case _cache_version_gen1:
+        return &cache_file_gen1_definition;
+    case _cache_version_gen2:
+        return &cache_file_gen2_definition;
+    case _cache_version_gen3:
+        return &cache_file_gen3_definition;
+    default:
+        return 0;
+    }
+}
+
+cache_header_definition *cache_header_definition_get(
+    cache_version version)
+{
+    extern cache_header_definition
+        cache_header_gen1_definition,
+        cache_header_gen2_definition,
+        cache_header_gen3_definition;
+
+    switch (version)
+    {
+    case _cache_version_gen1:
+        return &cache_header_gen1_definition;
+    case _cache_version_gen2:
+        return &cache_header_gen2_definition;
+    case _cache_version_gen3:
+        return &cache_header_gen3_definition;
+    default:
+        return 0;
+    }
+}
+
+cache_tag_header_definition *cache_tag_header_definition_get(
+    cache_version version)
+{
+    extern cache_tag_header_definition
+        cache_tag_header_gen1_definition,
+        cache_tag_header_gen2_definition,
+        cache_tag_header_gen3_definition;
+
+    switch (version)
+    {
+    case _cache_version_gen1:
+        return &cache_tag_header_gen1_definition;
+    case _cache_version_gen2:
+        return &cache_tag_header_gen2_definition;
+    case _cache_version_gen3:
+        return &cache_tag_header_gen3_definition;
+    default:
+        return 0;
+    }
+}
+
+cache_tag_instance_definition *cache_tag_instance_definition_get(
+    cache_version version)
+{
+    extern cache_tag_instance_definition
+        cache_tag_instance_gen1_definition,
+        cache_tag_instance_gen2_definition,
+        cache_tag_instance_gen3_definition;
+
+    switch (version)
+    {
+    case _cache_version_gen1:
+        return &cache_tag_instance_gen1_definition;
+    case _cache_version_gen2:
+        return &cache_tag_instance_gen2_definition;
+    case _cache_version_gen3:
+        return &cache_tag_instance_gen3_definition;
+    default:
+        return 0;
+    }
+}
+
+cache_strings_definition *cache_strings_definition_get(
+    cache_version version)
+{
+    switch (version)
+    {
+    default:
+        return 0;
+    }
+}
 
 cache_file *cache_file_load(
     char const *path)
@@ -282,100 +368,4 @@ char const *cache_file_get_string(
         return definition->get_string(file, index);
     
     return 0;
-}
-
-/* ---------- private code */
-
-cache_file_definition *cache_file_definition_get(
-    cache_version version)
-{
-    extern cache_file_definition
-        cache_file_gen1_definition,
-        cache_file_gen2_definition,
-        cache_file_gen3_definition;
-
-    switch (version)
-    {
-    case _cache_version_gen1:
-        return &cache_file_gen1_definition;
-    case _cache_version_gen2:
-        return &cache_file_gen2_definition;
-    case _cache_version_gen3:
-        return &cache_file_gen3_definition;
-    default:
-        return 0;
-    }
-}
-
-cache_header_definition *cache_header_definition_get(
-    cache_version version)
-{
-    extern cache_header_definition
-        cache_header_gen1_definition,
-        cache_header_gen2_definition,
-        cache_header_gen3_definition;
-
-    switch (version)
-    {
-    case _cache_version_gen1:
-        return &cache_header_gen1_definition;
-    case _cache_version_gen2:
-        return &cache_header_gen2_definition;
-    case _cache_version_gen3:
-        return &cache_header_gen3_definition;
-    default:
-        return 0;
-    }
-}
-
-cache_tag_header_definition *cache_tag_header_definition_get(
-    cache_version version)
-{
-    extern cache_tag_header_definition
-        cache_tag_header_gen1_definition,
-        cache_tag_header_gen2_definition,
-        cache_tag_header_gen3_definition;
-
-    switch (version)
-    {
-    case _cache_version_gen1:
-        return &cache_tag_header_gen1_definition;
-    case _cache_version_gen2:
-        return &cache_tag_header_gen2_definition;
-    case _cache_version_gen3:
-        return &cache_tag_header_gen3_definition;
-    default:
-        return 0;
-    }
-}
-
-cache_tag_instance_definition *cache_tag_instance_definition_get(
-    cache_version version)
-{
-    extern cache_tag_instance_definition
-        cache_tag_instance_gen1_definition,
-        cache_tag_instance_gen2_definition,
-        cache_tag_instance_gen3_definition;
-
-    switch (version)
-    {
-    case _cache_version_gen1:
-        return &cache_tag_instance_gen1_definition;
-    case _cache_version_gen2:
-        return &cache_tag_instance_gen2_definition;
-    case _cache_version_gen3:
-        return &cache_tag_instance_gen3_definition;
-    default:
-        return 0;
-    }
-}
-
-cache_strings_definition *cache_strings_definition_get(
-    cache_version version)
-{
-    switch (version)
-    {
-    default:
-        return 0;
-    }
 }

@@ -10,13 +10,13 @@
 
 int main()
 {
-    cache_file *file = cache_file_load("C:\\Halo\\Maps\\H3\\guardian.map");
+    cache_file *file = cache_file_load("C:\\Halo\\Maps\\H2X\\ascension.map");
     puts("loaded");
 
     long tag_count = cache_file_get_tag_count(file);
 
-    /*for (long i = 0; i < tag_count; i++)
-        printf("0x%X - %s\n", i, cache_file_get_tag_name(file, i));*/
+    for (long i = 0; i < tag_count; i++)
+        printf("0x%X - %s\n", i, cache_file_get_tag_name(file, i));
 
     printf("map: %s, build: %s, tag count: %li\n",
         cache_file_get_name(file),
