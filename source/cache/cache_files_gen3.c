@@ -248,69 +248,6 @@ cache_tag_instance_gen3 *cache_file_gen3_get_tag_instance(
     return &tag_instances[index];
 }
 
-void cache_header_gen3_byteswap(
-    cache_header_gen3 *header)
-{
-    int i;
-    header->header_signature = _byteswap_ulong(header->header_signature);
-    header->version = _byteswap_ulong(header->version);
-    header->file_length = _byteswap_ulong(header->file_length);
-    header->compressed_file_length = _byteswap_ulong(header->compressed_file_length);
-    header->offset_to_index = _byteswap_ulong(header->offset_to_index);
-    header->index_stream_size = _byteswap_ulong(header->index_stream_size);
-    header->tag_buffer_size = _byteswap_ulong(header->tag_buffer_size);
-    header->type = _byteswap_ushort(header->type);
-    header->shared_type = _byteswap_ushort(header->shared_type);
-    header->string_id_count = _byteswap_ulong(header->string_id_count);
-    header->string_id_buffer_size = _byteswap_ulong(header->string_id_buffer_size);
-    header->string_id_indices_offset = _byteswap_ulong(header->string_id_indices_offset);
-    header->string_id_buffer_offset = _byteswap_ulong(header->string_id_buffer_offset);
-    header->external_dependencies = _byteswap_ulong(header->external_dependencies);
-    header->high_date_time = _byteswap_ulong(header->high_date_time);
-    header->low_date_time = _byteswap_ulong(header->low_date_time);
-    header->ui_high_date_time = _byteswap_ulong(header->ui_high_date_time);
-    header->ui_low_date_time = _byteswap_ulong(header->ui_low_date_time);
-    header->shared_high_date_time = _byteswap_ulong(header->shared_high_date_time);
-    header->shared_low_date_time = _byteswap_ulong(header->shared_low_date_time);
-    header->campaign_high_date_time = _byteswap_ulong(header->campaign_high_date_time);
-    header->campaign_low_date_time = _byteswap_ulong(header->campaign_low_date_time);
-    header->minor_version = _byteswap_ulong(header->minor_version);
-    header->tag_names_count = _byteswap_ulong(header->tag_names_count);
-    header->tag_names_buffer_offset = _byteswap_ulong(header->tag_names_buffer_offset);
-    header->tag_names_buffer_size = _byteswap_ulong(header->tag_names_buffer_size);
-    header->tag_names_indices_offset = _byteswap_ulong(header->tag_names_indices_offset);
-    header->checksum = _byteswap_ulong(header->checksum);
-    header->base_address = _byteswap_ulong(header->base_address);
-    header->xdk_version = _byteswap_ulong(header->xdk_version);
-    for (i = 0; i < NUMBER_OF_CACHE_PARTITIONS; i++)
-    {
-        header->partitions[i].base_address = _byteswap_ulong(header->partitions[i].base_address);
-        header->partitions[i].size = _byteswap_ulong(header->partitions[i].size);
-    }
-    for (i = 0; i < 5; i++)
-        header->sha1_a[i] = _byteswap_ulong(header->sha1_a[i]);
-    for (i = 0; i < 5; i++)
-        header->sha1_b[i] = _byteswap_ulong(header->sha1_b[i]);
-    for (i = 0; i < 5; i++)
-        header->sha1_c[i] = _byteswap_ulong(header->sha1_c[i]);
-    for (i = 0; i < 64; i++)
-        header->rsa[i] = _byteswap_ulong(header->rsa[i]);
-    header->interop.resource_base_address = _byteswap_ulong(header->interop.resource_base_address);
-    header->interop.debug_section_size = _byteswap_ulong(header->interop.debug_section_size);
-    header->interop.runtime_base_address = _byteswap_ulong(header->interop.runtime_base_address);
-    header->interop.unknown_base_address = _byteswap_ulong(header->interop.unknown_base_address);
-    for (i = 0; i < NUMBER_OF_CACHE_SECTIONS; i++)
-    {
-        header->interop.sections[i].virtual_address = _byteswap_ulong(header->interop.sections[i].virtual_address);
-        header->interop.sections[i].size = _byteswap_ulong(header->interop.sections[i].size);
-    }
-    for (i = 0; i < 4; i++)
-        header->guid[i] = _byteswap_ulong(header->guid[i]);
-    for (i = 0; i < 4; i++)
-        header->compression_guid[i] = _byteswap_ulong(header->compression_guid[i]);
-    header->footer_signature = _byteswap_ulong(header->footer_signature);
-}
-
 long cache_header_gen3_get_file_length(
     cache_header_gen3 *header)
 {
@@ -365,21 +302,6 @@ dword cache_tag_header_gen3_get_tags_offset(
     return header->tags_offset;
 }
 
-void cache_tag_header_gen3_byteswap(
-    cache_tag_header_gen3 *header)
-{
-    header->group_tags_offset = _byteswap_ulong(header->group_tags_offset);
-    header->group_tags_count = _byteswap_ulong(header->group_tags_count);
-    header->count = _byteswap_ulong(header->count);
-    header->tags_offset = _byteswap_ulong(header->tags_offset);
-    header->dependent_tags_count = _byteswap_ulong(header->dependent_tags_count);
-    header->dependent_tags_offset = _byteswap_ulong(header->dependent_tags_offset);
-    header->dependent_tags_count2 = _byteswap_ulong(header->dependent_tags_count2);
-    header->dependent_tags_offset2 = _byteswap_ulong(header->dependent_tags_offset2);
-    header->checksum = _byteswap_ulong(header->checksum);
-    header->signature = _byteswap_ulong(header->signature);
-}
-
 tag cache_tag_instance_gen3_get_group_tag(
     cache_file *file,
     cache_tag_instance_gen3 *instance)
@@ -429,12 +351,4 @@ dword cache_tag_instance_gen3_get_offset(
     cache_tag_instance_gen3 *instance)
 {
     return instance->offset;
-}
-
-void cache_tag_instance_gen3_byteswap(
-    cache_tag_instance_gen3 *instance)
-{
-    instance->identifier = _byteswap_ushort(instance->identifier);
-    instance->group_index = _byteswap_ushort(instance->group_index);
-    instance->offset = _byteswap_ulong(instance->offset);
 }

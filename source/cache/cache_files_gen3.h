@@ -154,14 +154,11 @@ char const *cache_header_gen3_get_name(cache_header_gen3 *header);
 char const *cache_header_gen3_get_build(cache_header_gen3 *header);
 cache_type cache_header_gen3_get_type(cache_header_gen3 *header);
 cache_shared_type cache_header_gen3_get_shared_type(cache_header_gen3 *header);
-void cache_header_gen3_byteswap(cache_header_gen3 *header);
 
 long cache_tag_header_gen3_get_tag_count(cache_tag_header_gen3 *header);
 dword cache_tag_header_gen3_get_tags_offset(cache_tag_header_gen3 *header);
-void cache_tag_header_gen3_byteswap(cache_tag_header_gen3 *header);
 
 tag cache_tag_instance_gen3_get_group_tag(cache_file *file, cache_tag_instance_gen3 *instance);
 long cache_tag_instance_gen3_get_index(cache_file *file, cache_tag_instance_gen3 *instance);
 dword cache_tag_instance_gen3_get_name_offset(cache_file *file, cache_tag_instance_gen3 *instance);
 dword cache_tag_instance_gen3_get_offset(cache_file *file, cache_tag_instance_gen3 *instance);
-void cache_tag_instance_gen3_byteswap(cache_tag_instance_gen3 *instance);
