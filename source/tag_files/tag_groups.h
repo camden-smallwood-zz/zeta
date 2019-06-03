@@ -35,7 +35,7 @@
 
 typedef enum field_type
 {
-    _field_tag,
+	_field_tag,
 	_field_string,
 	_field_long_string,
 	_field_string_id,
@@ -93,7 +93,7 @@ typedef enum field_type
 	_field_padding,
 	_field_explanation,
 	_field_terminator,
-    NUMBER_OF_FIELD_TYPES
+	NUMBER_OF_FIELD_TYPES
 } field_type;
 
 typedef struct field_definition
