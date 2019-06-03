@@ -129,8 +129,16 @@ cache_tag_instance_definition *cache_tag_instance_definition_get(
 cache_strings_definition *cache_strings_definition_get(
 	cache_version version)
 {
+	extern cache_strings_definition
+		cache_strings_gen2_definition,
+		cache_strings_gen3_definition;
+
 	switch (version)
 	{
+	case _cache_version_gen2:
+		return &cache_strings_gen2_definition;
+	case _cache_version_gen3:
+		return &cache_strings_gen3_definition;
 	default:
 		return 0;
 	}
@@ -357,6 +365,18 @@ dword cache_file_get_tag_offset(
 	return 0;
 }
 
+dword cache_file_get_string_count(
+	cache_file *file)
+{
+	cache_version version = cache_file_get_version(file);
+	cache_strings_definition *definition = cache_strings_definition_get(version);
+	
+	if (definition && definition->get_string_count)
+		return definition->get_string_count(file);
+	
+	return 0;
+}
+
 char const *cache_file_get_string(
 	cache_file *file,
 	long index)
@@ -364,8 +384,15 @@ char const *cache_file_get_string(
 	cache_version version = cache_file_get_version(file);
 	cache_strings_definition *definition = cache_strings_definition_get(version);
 	
-	if (definition && definition->get_string)
-		return definition->get_string(file, index);
+	if (definition && definition->get_string_offset)
+	{
+		dword offset = definition->get_string_offset(file, index);
+
+		if (offset == NONE)
+			return "";
+		
+		return (char *)file + offset;
+	}
 	
 	return 0;
 }

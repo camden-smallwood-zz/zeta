@@ -6,7 +6,6 @@ typedef void cache_file;
 typedef void cache_header;
 typedef void cache_tag_header;
 typedef void cache_tag_instance;
-typedef void cache_strings;
 
 typedef enum cache_version
 {
@@ -76,7 +75,8 @@ typedef struct cache_tag_instance_definition
 
 typedef struct cache_strings_definition
 {
-	char const *(*get_string)(cache_strings *strings, long index);
+	dword(*get_string_count)(cache_file *file);
+	dword(*get_string_offset)(cache_file *file, long index);
 } cache_strings_definition;
 
 /* ---------- prototypes/CACHE_FILES.C */
@@ -104,4 +104,5 @@ dword cache_file_get_tags_offset(cache_file *file);
 tag cache_file_get_tag_group_tag(cache_file *file, long index);
 char const *cache_file_get_tag_name(cache_file *file, long index);
 dword cache_file_get_tag_offset(cache_file *file, long index);
+dword cache_file_get_string_count(cache_file *file);
 char const *cache_file_get_string(cache_file *file, long index);

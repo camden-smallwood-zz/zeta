@@ -162,3 +162,6 @@ tag cache_tag_instance_gen3_get_group_tag(cache_file *file, cache_tag_instance_g
 long cache_tag_instance_gen3_get_index(cache_file *file, cache_tag_instance_gen3 *instance);
 dword cache_tag_instance_gen3_get_name_offset(cache_file *file, cache_tag_instance_gen3 *instance);
 dword cache_tag_instance_gen3_get_offset(cache_file *file, cache_tag_instance_gen3 *instance);
+
+dword cache_strings_gen3_get_string_count(cache_file *file);
+dword cache_strings_gen3_get_string_offset(cache_file *file, long index);

@@ -204,6 +204,12 @@ cache_tag_instance_definition cache_tag_instance_gen3_definition =
 	cache_tag_instance_gen3_get_offset
 };
 
+cache_strings_definition cache_strings_gen3_definition =
+{
+	cache_strings_gen3_get_string_count,
+	cache_strings_gen3_get_string_offset
+};
+
 /* ---------- code */
 
 cache_file *cache_file_gen3_load(
@@ -265,12 +271,10 @@ cache_file *cache_file_gen3_load(
 			instance->offset -= address_mask;
 		}
 
-		array_definition name_offsets_array =
-		{
-			_field_long_integer,
-			"name_offsets_array",
-			tag_header->count
-		};
+		TAG_ARRAY(_field_long_integer, string_offsets_array, header->string_id_count);
+		array_byteswap(&string_offsets_array, _cache_version_gen3, (char *)result + header->string_id_indices_offset);
+
+		TAG_ARRAY(_field_long_integer, name_offsets_array, tag_header->count);
 		array_byteswap(&name_offsets_array, _cache_version_gen3, (char *)result + header->tag_names_indices_offset);
 	}
 	
@@ -403,4 +407,25 @@ dword cache_tag_instance_gen3_get_offset(
 	cache_tag_instance_gen3 *instance)
 {
 	return instance->offset;
+}
+
+dword cache_strings_gen3_get_string_count(
+	cache_file *file)
+{
+	return ((cache_header_gen3 *)file)->string_id_count;
+}
+
+dword cache_strings_gen3_get_string_offset(
+	cache_file *file,
+	long index)
+{
+	cache_header_gen3 *header = file;
+	
+	long *string_offsets = (char *)file + header->string_id_indices_offset;
+	long string_offset = string_offsets[index & 0xFFFF];
+	
+	if (string_offset == NONE)
+		return NONE;
+
+	return header->string_id_buffer_offset + string_offset;
 }
