@@ -50,6 +50,7 @@ typedef struct cache_file_definition
 
 typedef struct cache_header_definition
 {
+	struct struct_definition *definition;
 	long(*get_file_length)(cache_header *header);
 	long(*get_tag_header_offset)(cache_header *header);
 	long(*get_tag_buffer_size)(cache_header *header);
@@ -61,12 +62,14 @@ typedef struct cache_header_definition
 
 typedef struct cache_tag_header_definition
 {
+	struct struct_definition *definition;
 	long(*get_tag_count)(cache_tag_header *header);
 	dword(*get_tags_offset)(cache_tag_header *header);
 } cache_tag_header_definition;
 
 typedef struct cache_tag_instance_definition
 {
+	struct struct_definition *definition;
 	tag(*get_group_tag)(cache_file *file, cache_tag_instance *instance);
 	long(*get_index)(cache_file *file, cache_tag_instance *instance);
 	dword(*get_name_offset)(cache_file *file, cache_tag_instance *instance);

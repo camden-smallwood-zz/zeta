@@ -181,6 +181,7 @@ cache_file_definition cache_file_gen3_definition =
 
 cache_header_definition cache_header_gen3_definition =
 {
+	&cache_header_gen3_struct,
 	cache_header_gen3_get_file_length,
 	cache_header_gen3_get_tag_header_offset,
 	cache_header_gen3_get_tag_buffer_size,
@@ -192,12 +193,14 @@ cache_header_definition cache_header_gen3_definition =
 
 cache_tag_header_definition cache_tag_header_gen3_definition =
 {
+	&cache_tag_header_gen3_struct,
 	cache_tag_header_gen3_get_tag_count,
 	cache_tag_header_gen3_get_tags_offset
 };
 
 cache_tag_instance_definition cache_tag_instance_gen3_definition =
 {
+	&cache_tag_instance_gen3_struct,
 	cache_tag_instance_gen3_get_group_tag,
 	cache_tag_instance_gen3_get_index,
 	cache_tag_instance_gen3_get_name_offset,

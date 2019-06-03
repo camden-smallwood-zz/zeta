@@ -8,6 +8,61 @@
 #include <cseries/cseries.h>
 #include <cache/cache_files.h>
 #include <cache/cache_files_gen1.h>
+#include <tag_files/tag_groups.h>
+
+/* ---------- definitions */
+
+long const cache_header_gen1_unused_length = 1936;
+
+TAG_STRUCT(cache_header_gen1_struct, sizeof(cache_header_gen1))
+{
+	{ _field_tag, "header_signature" },
+	{ _field_long_enum, "version" },
+	{ _field_long_integer, "file_length" },
+	{ _field_long_integer, "compressed_file_length" },
+	{ _field_long_integer, "offset_to_index" },
+	{ _field_long_integer, "tag_buffer_size" },
+	{ _field_long_integer, "" },
+	{ _field_long_integer, "" },
+	{ _field_string, "name" },
+	{ _field_string, "build" },
+	{ _field_long_enum, "type" },
+	{ _field_dword_integer, "crc" },
+	{ _field_long_integer, "" },
+	{ _field_padding, "", &cache_header_gen1_unused_length },
+	{ _field_tag, "footer_signature" },
+	{ _field_terminator }
+};
+
+TAG_STRUCT(cache_tag_header_gen1_struct, sizeof(cache_tag_header_gen1))
+{
+	{ _field_dword_integer, "tags_offset" },
+	{ _field_long_integer, "scenario_index" },
+	{ _field_dword_integer, "checksum" },
+	{ _field_long_integer, "count" },
+	{ _field_long_integer, "vertices_offset" },
+	{ _field_long_integer, "vertex_count" },
+	{ _field_long_integer, "indices_offset" },
+	{ _field_long_integer, "index_count" },
+	{ _field_long_integer, "model_data_size" },
+	{ _field_tag, "signature" },
+	{ _field_terminator }
+};
+
+TAG_ARRAY(_field_tag, group_tags_array_gen1, 3);
+
+TAG_STRUCT(cache_tag_instance_gen1_struct, sizeof(cache_tag_instance_gen1))
+{
+	{ _field_array, "group_tags", &group_tags_array_gen1 },
+	{ _field_long_integer, "index" },
+	{ _field_dword_integer, "name_offset" },
+	{ _field_dword_integer, "offset" },
+	{ _field_byte_integer, "external" },
+	{ _field_char_integer, "" },
+	{ _field_short_integer, "" },
+	{ _field_long_integer, "" },
+	{ _field_terminator }
+};
 
 /* ---------- globals */
 
@@ -21,6 +76,7 @@ cache_file_definition cache_file_gen1_definition =
 
 cache_header_definition cache_header_gen1_definition =
 {
+	&cache_header_gen1_struct,
 	cache_header_gen1_get_file_length,
 	cache_header_gen1_get_tag_header_offset,
 	cache_header_gen1_get_tag_buffer_size,
@@ -32,12 +88,14 @@ cache_header_definition cache_header_gen1_definition =
 
 cache_tag_header_definition cache_tag_header_gen1_definition =
 {
+	&cache_tag_header_gen1_struct,
 	cache_tag_header_gen1_get_tag_count,
 	cache_tag_header_gen1_get_tags_offset
 };
 
 cache_tag_instance_definition cache_tag_instance_gen1_definition =
 {
+	&cache_tag_instance_gen1_struct,
 	cache_tag_instance_gen1_get_group_tag,
 	cache_tag_instance_gen1_get_index,
 	cache_tag_instance_gen1_get_name_offset,

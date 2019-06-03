@@ -8,6 +8,87 @@
 #include <cseries/cseries.h>
 #include <cache/cache_files.h>
 #include <cache/cache_files_gen2.h>
+#include <tag_files/tag_groups.h>
+
+/* ---------- definitions */
+
+extern enum_definition cache_version_enum;
+extern enum_definition cache_type_enum;
+
+long const cache_file_gen2_padding_length = 1320;
+
+TAG_STRUCT(cache_header_gen2_struct, sizeof(cache_header_gen2))
+{
+	{ _field_tag, "header_signature" },
+	{ _field_long_enum, "version", &cache_version_enum },
+	{ _field_dword_integer, "file_length" },
+	{ _field_dword_integer, "compressed_file_length" },
+	{ _field_dword_integer, "offset_to_index" },
+	{ _field_dword_integer, "index_stream_size" },
+	{ _field_dword_integer, "tag_buffer_size" },
+	{ _field_dword_integer, "total_stream_size" },
+	{ _field_long_string, "source_file" },
+	{ _field_string, "build" },
+	{ _field_long_enum, "type", &cache_type_enum },
+	{ _field_dword_integer, "crc" },
+	{ _field_char_integer, "" },
+	{ _field_byte_integer, "tracked_build" },
+	{ _field_char_integer, "" },
+	{ _field_char_integer, "" },
+	{ _field_long_integer, "" },
+	{ _field_long_integer, "" },
+	{ _field_long_integer, "" },
+	{ _field_long_integer, "" },
+	{ _field_long_integer, "" },
+	{ _field_dword_integer, "string_id_buffer_aligned_offset" },
+	{ _field_dword_integer, "string_id_count" },
+	{ _field_dword_integer, "string_id_buffer_size" },
+	{ _field_dword_integer, "string_id_indices_offset" },
+	{ _field_dword_integer, "string_id_buffer_offset" },
+	{ _field_long_integer, "external_dependencies" },
+	{ _field_long_integer, "high_date_time" },
+	{ _field_long_integer, "low_date_time" },
+	{ _field_long_integer, "ui_high_date_time" },
+	{ _field_long_integer, "ui_low_date_time" },
+	{ _field_long_integer, "shared_high_date_time" },
+	{ _field_long_integer, "shared_low_date_time" },
+	{ _field_long_integer, "campaign_high_date_time" },
+	{ _field_long_integer, "campaign_low_date_time" },
+	{ _field_string, "name" },
+	{ _field_long_integer, ":" },
+	{ _field_long_string, "scenario_name" },
+	{ _field_dword_integer, "minor_version" },
+	{ _field_dword_integer, "tag_names_count" },
+	{ _field_dword_integer, "tag_names_buffer_offset" },
+	{ _field_dword_integer, "tag_names_buffer_size" },
+	{ _field_dword_integer, "tag_names_indices_offset" },
+	{ _field_dword_integer, "checksum" },
+	{ _field_padding, "", &cache_file_gen2_padding_length },
+	{ _field_tag, "footer_signature" },
+	{ _field_terminator }
+};
+
+TAG_STRUCT(cache_tag_header_gen2_struct, sizeof(cache_tag_header_gen2))
+{
+	{ _field_dword_integer, "group_tags_offset" },
+	{ _field_long_integer, "group_tags_count" },
+	{ _field_dword_integer, "tags_offset" },
+	{ _field_long_integer, "scenario_index" },
+	{ _field_long_integer, "globals_index" },
+	{ _field_dword_integer, "checksum" },
+	{ _field_long_integer, "count" },
+	{ _field_tag, "signature" },
+	{ _field_terminator }
+};
+
+TAG_STRUCT(cache_tag_instance_gen2_struct, sizeof(cache_tag_instance_gen2))
+{
+	{ _field_tag, "group_tag" },
+	{ _field_long_integer, "index" },
+	{ _field_dword_integer, "offset" },
+	{ _field_dword_integer, "size" },
+	{ _field_terminator }
+};
 
 /* ---------- globals */
 
@@ -21,6 +102,7 @@ cache_file_definition cache_file_gen2_definition =
 
 cache_header_definition cache_header_gen2_definition =
 {
+	&cache_header_gen2_struct,
 	cache_header_gen2_get_file_length,
 	cache_header_gen2_get_tag_header_offset,
 	cache_header_gen2_get_tag_buffer_size,
@@ -32,12 +114,14 @@ cache_header_definition cache_header_gen2_definition =
 
 cache_tag_header_definition cache_tag_header_gen2_definition =
 {
+	&cache_tag_header_gen2_struct,
 	cache_tag_header_gen2_get_tag_count,
 	cache_tag_header_gen2_get_tags_offset
 };
 
 cache_tag_instance_definition cache_tag_instance_gen2_definition =
 {
+	&cache_tag_instance_gen2_struct,
 	cache_tag_instance_gen2_get_group_tag,
 	cache_tag_instance_gen2_get_index,
 	cache_tag_instance_gen2_get_name_offset,
